@@ -1,0 +1,63 @@
+{{ define "site-list" }}
+<div class="feed-header">
+  <div>
+    <p class="eyebrow">API Strategy</p>
+    <h2>{{ .SiteList.Strategy }}</h2>
+  </div>
+  <div class="feed-summary">
+    <span>{{ len .SiteList.Sites }} sites</span>
+    {{ if .Filter.Tag }}<span>tag: {{ .Filter.Tag }}</span>{{ end }}
+    {{ if .Filter.Query }}<span>query: {{ .Filter.Query }}</span>{{ end }}
+  </div>
+</div>
+
+<div class="feed-list">
+  {{ if .SiteList.Sites }}
+    {{ range .SiteList.Sites }}
+    <article class="feed-item">
+      <div class="feed-item-meta">
+        <div class="meta-inline">
+          <span class="meta-chip">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="5" width="18" height="16" rx="3"></rect>
+              <path d="M8 3v4M16 3v4M3 10h18"></path>
+            </svg>
+            {{ formatDate .CreatedAt }}
+          </span>
+          <span class="meta-chip">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="8" r="4"></circle>
+              <path d="M4 20c1.8-4 5-6 8-6s6.2 2 8 6"></path>
+            </svg>
+            {{ .AddedBy }}
+          </span>
+        </div>
+        <span class="status {{ .Status }}">{{ .Status }}</span>
+      </div>
+      <h3><a href="{{ .URL }}" target="_blank" rel="noreferrer">{{ .Title }}</a></h3>
+      <p class="feed-item-body">{{ .Description }}</p>
+      <ul class="tag-list">
+        {{ range .Tags }}
+        <li>#{{ . }}</li>
+        {{ end }}
+      </ul>
+      <div class="feed-item-footer">
+        <div class="metric-row">
+          <span class="pill">{{ .StrategyLabel }}</span>
+          <span>{{ .Domain }}</span>
+        </div>
+        <div class="metric-row">
+          <span>{{ .BookmarkedBy }} bookmarks</span>
+          <a href="{{ .URL }}" target="_blank" rel="noreferrer">Open</a>
+        </div>
+      </div>
+    </article>
+    {{ end }}
+  {{ else }}
+    <article class="empty-state">
+      <h3>一致するサイトがありません</h3>
+      <p>条件を少し緩めるか、Strategy を切り替えて再検索してください。</p>
+    </article>
+  {{ end }}
+</div>
+{{ end }}

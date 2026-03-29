@@ -1,0 +1,123 @@
+{{ define "layout" }}
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Push Link v2</title>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <link rel="stylesheet" href="/static/common/colors.css">
+    <link rel="stylesheet" href="/static/app.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="/">push-link</a>
+        <form
+          class="searchbar"
+          hx-get="/ui/sites"
+          hx-target="#site-list"
+          hx-include="#feed-filters"
+          hx-trigger="keyup changed delay:250ms from:input[name='q'], submit"
+        >
+          <input id="q" type="search" name="q" value="{{ .Filter.Query }}" placeholder="タイトル、ドメイン、タグで検索">
+        </form>
+      </div>
+    </header>
+
+    <main class="shell shell-feed">
+      <aside class="sidebar">
+        <section class="side-card">
+          <p class="eyebrow">Feed Strategy</p>
+          <nav class="strategy-nav">
+            <a href="/?strategy=default" class="{{ if eq .Filter.Strategy "default" }}active{{ end }}">Default</a>
+            <a href="/?strategy=published" class="{{ if eq .Filter.Strategy "published" }}active{{ end }}">Published</a>
+            <a href="/?strategy=trending" class="{{ if eq .Filter.Strategy "trending" }}active{{ end }}">Trending</a>
+          </nav>
+        </section>
+
+        <section class="side-card">
+          <p class="eyebrow">Filters</p>
+          <form
+            id="feed-filters"
+            class="filters"
+            hx-get="/ui/sites"
+            hx-target="#site-list"
+            hx-include=".searchbar"
+            hx-trigger="change"
+          >
+            <div class="field">
+              <label for="strategy">Strategy</label>
+              <select id="strategy" name="strategy">
+                <option value="default" {{ if eq .Filter.Strategy "default" }}selected{{ end }}>Default</option>
+                <option value="published" {{ if eq .Filter.Strategy "published" }}selected{{ end }}>Published</option>
+                <option value="trending" {{ if eq .Filter.Strategy "trending" }}selected{{ end }}>Trending</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="tag">Tag</label>
+              <select id="tag" name="tag">
+                <option value="">All Tags</option>
+                {{ range .SiteList.AvailableTags }}
+                <option value="{{ . }}" {{ if eq $.Filter.Tag . }}selected{{ end }}>{{ . }}</option>
+                {{ end }}
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="status">Status</label>
+              <select id="status" name="status">
+                <option value="">Any Status</option>
+                <option value="published" {{ if eq .Filter.Status "published" }}selected{{ end }}>published</option>
+                <option value="draft" {{ if eq .Filter.Status "draft" }}selected{{ end }}>draft</option>
+                <option value="archived" {{ if eq .Filter.Status "archived" }}selected{{ end }}>archived</option>
+              </select>
+            </div>
+          </form>
+        </section>
+
+        <section class="side-card">
+          <p class="eyebrow">Tag Rankings</p>
+          <ul class="tag-ranking">
+            {{ range $index, $tag := .SiteList.AvailableTags }}
+            <li>
+              <span>{{ add1 $index }}</span>
+              <strong>{{ $tag }}</strong>
+            </li>
+            {{ end }}
+          </ul>
+        </section>
+      </aside>
+
+      <section class="feed">
+        <section class="hero hero-compact">
+          <p class="eyebrow">HTMX + Go</p>
+          <div class="hero-chart-header">
+            <div>
+              <h1>月次登録数</h1>
+              <p class="lede">サイト登録の推移を月ごとに確認できます。</p>
+            </div>
+            <p class="chart-total">{{ len .SiteList.Sites }} total sites</p>
+          </div>
+          <div class="bar-chart" aria-label="月次登録数">
+            {{ range .SiteList.MonthlyRegistrations }}
+            <div class="bar-group">
+              <div class="bar-track">
+                <div class="bar-fill count-{{ .Count }}"></div>
+              </div>
+              <strong>{{ .Count }}</strong>
+              <span>{{ .Label }}</span>
+            </div>
+            {{ end }}
+          </div>
+        </section>
+
+        <div id="site-list">
+          {{ template "site-list" . }}
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
+{{ end }}
